@@ -70,119 +70,6 @@ class medcpt:
 
         return total_unique_cluster_span, total_unique_cluster_support, total_unique_cluster_pos
 
-    def get_input_parser_weight(self, iteration, pickle_dataset_dump_directory, folders, sentence_count, medcpt_dictionary):
-        if iteration == 1:
-            input_parser_weight = [1] * len(folders)
-        else:
-            input_parser_weight = []
-            for j in range(0, len(folders)):
-                folder = folders[j]
-                pickle_path = str(pickle_dataset_dump_directory) + str(folder) + '/'
-                with open(str(pickle_path) + '/unique_sentence_cluster_dictionary.pickle', 'rb') as handle:
-                    unique_sentence_cluster_dictionary = pickle.load(handle)
-                robinson_foulds_distance = 0
-                for k in range(1, sentence_count + 1):
-                    true_cluster = medcpt_dictionary[k]['medcpt_clusters']
-                    predict_cluster = unique_sentence_cluster_dictionary[k]['unique_cluster_span']
-                    true_error = medcpt_dictionary[k]['error']
-                    predict_error = unique_sentence_cluster_dictionary[k]['error']
-                    if (true_error == False) and (predict_error == False):
-                        evaluation_object = evaluation(true_cluster=true_cluster, predict_cluster=predict_cluster)
-                        robinson_foulds_distance = robinson_foulds_distance + evaluation_object.robinson_foulds_distance(cluster1=true_cluster, cluster2=predict_cluster)
-                    elif (predict_error == False):
-                        robinson_foulds_distance = robinson_foulds_distance + len(true_cluster)
-                if robinson_foulds_distance != 0:
-                    input_parser_weight.append(1/robinson_foulds_distance)
-                else:
-                    input_parser_weight.append(1)
-
-        # sum_value = np.sum(input_parser_weight)
-        # for a in range(0, len(input_parser_weight)):
-        #     if input_parser_weight[a] == -1:
-        #         input_parser_weight[a] = sum_value +1
-
-        return input_parser_weight
-
-    def get_input_parser_weight_max(self, iteration, pickle_dataset_dump_directory, folders, sentence_count, medcpt_dictionary):
-        if iteration == 1:
-            input_parser_weight = [1] * len(folders)
-        else:
-            #input_parser_weight = []
-            robinson_foulds_distance_array = []
-            for j in range(0, len(folders)):
-                folder = folders[j]
-                pickle_path = str(pickle_dataset_dump_directory) + str(folder) + '/'
-                with open(str(pickle_path) + '/unique_sentence_cluster_dictionary.pickle', 'rb') as handle:
-                    unique_sentence_cluster_dictionary = pickle.load(handle)
-                robinson_foulds_distance = 0
-                for k in range(1, sentence_count + 1):
-                    true_cluster = medcpt_dictionary[k]['medcpt_clusters']
-                    predict_cluster = unique_sentence_cluster_dictionary[k]['unique_cluster_span']
-                    true_error = medcpt_dictionary[k]['error']
-                    predict_error = unique_sentence_cluster_dictionary[k]['error']
-                    if (true_error == False) and (predict_error == False):
-                        evaluation_object = evaluation(true_cluster=true_cluster, predict_cluster=predict_cluster)
-                        robinson_foulds_distance = robinson_foulds_distance + evaluation_object.robinson_foulds_distance(cluster1=true_cluster, cluster2=predict_cluster)
-                    elif (predict_error == False):
-                        robinson_foulds_distance = robinson_foulds_distance + len(true_cluster)
-                # if robinson_foulds_distance != 0:
-                robinson_foulds_distance_array.append(robinson_foulds_distance)
-                # else:
-                #     input_parser_weight.append(-1)
-        # sum_value = np.sum(robinson_foulds_distance_array)
-        # for a in range(0, len(robinson_foulds_distance_array)):
-        #     if input_parser_weight[a] == -1:
-        #         input_parser_weight[a] = sum_value + 1
-
-        if iteration != 1:
-            input_parser_weight = []
-            max_index = np.argmax(robinson_foulds_distance_array)
-            max_value = robinson_foulds_distance_array[max_index]
-            for a in range(0, len(robinson_foulds_distance_array)):
-                weight = -math.log(robinson_foulds_distance_array[a]/(max_value + 1e-7))
-                input_parser_weight.append(weight)
-        # for a in range(0, len(robinson_foulds_distance_array)):
-        #     input_parser_weight.append(robinson_foulds_distance_array[a]/max_value)
-
-        return input_parser_weight
-
-    def get_input_parser_weight_sum(self, iteration, pickle_dataset_dump_directory, folders, sentence_count, medcpt_dictionary):
-        if iteration == 1:
-            input_parser_weight = [1] * len(folders)
-        else:
-            input_parser_weight = []
-            for j in range(0, len(folders)):
-                folder = folders[j]
-                pickle_path = str(pickle_dataset_dump_directory) + str(folder) + '/'
-                with open(str(pickle_path) + '/unique_sentence_cluster_dictionary.pickle', 'rb') as handle:
-                    unique_sentence_cluster_dictionary = pickle.load(handle)
-                robinson_foulds_distance = 0
-                for k in range(1, sentence_count + 1):
-                    true_cluster = medcpt_dictionary[k]['medcpt_clusters']
-                    predict_cluster = unique_sentence_cluster_dictionary[k]['unique_cluster_span']
-                    true_error = medcpt_dictionary[k]['error']
-                    predict_error = unique_sentence_cluster_dictionary[k]['error']
-                    if (true_error == False) and (predict_error == False):
-                        evaluation_object = evaluation(true_cluster=true_cluster, predict_cluster=predict_cluster)
-                        robinson_foulds_distance = robinson_foulds_distance + evaluation_object.robinson_foulds_distance(cluster1=true_cluster, cluster2=predict_cluster)
-                    elif (predict_error == False):
-                        robinson_foulds_distance = robinson_foulds_distance + len(true_cluster)
-                if robinson_foulds_distance != 0:
-                    input_parser_weight.append(1/robinson_foulds_distance)
-                else:
-                    input_parser_weight.append(-1)
-
-        sum_value = np.sum(input_parser_weight)
-        for a in range(0, len(input_parser_weight)):
-            if input_parser_weight[a] == -1:
-                input_parser_weight[a] = sum_value + 1
-
-        sum_value = np.sum(input_parser_weight)
-        for a in range(0, len(input_parser_weight)):
-            input_parser_weight[a] = input_parser_weight[a]/sum_value
-
-        return input_parser_weight
-
     def get_input_parser_weight_log(self, iteration, pickle_dataset_dump_directory, folders, sentence_count, medcpt_dictionary):
         if iteration == 1:
             input_parser_weight = [1] * len(folders)
@@ -204,67 +91,54 @@ class medcpt:
                         robinson_foulds_distance = robinson_foulds_distance + evaluation_object.robinson_foulds_distance(cluster1=true_cluster, cluster2=predict_cluster)
                     elif (predict_error == False):
                         robinson_foulds_distance = robinson_foulds_distance + len(true_cluster)
-                # if robinson_foulds_distance != 0:
-                #     input_parser_weight.append(1/robinson_foulds_distance)
-                # else:
-                #     input_parser_weight.append(-1)
                 robinson_foulds_distance_array.append(robinson_foulds_distance)
-        # for a in range(0, len(input_parser_weight)):
-        #     if input_parser_weight[a] == -1:
-        #         input_parser_weight[a] = sum_value + 1
         if iteration != 1:
             input_parser_weight = []
-            sum_value = np.sum(robinson_foulds_distance_array)
+            max_value = np.max(robinson_foulds_distance_array)
+
             for a in range(0, len(robinson_foulds_distance_array)):
-                weight = -math.log(robinson_foulds_distance_array[a]/sum_value)
+                weight = -math.log(robinson_foulds_distance_array[a]/max_value + 1e-7)
                 input_parser_weight.append(weight)
-            # max_index = np.argmax(input_parser_weight)
-            # max_value = input_parser_weight[max_index]
-            # for a in range(0, len(input_parser_weight)):
-            #     input_parser_weight[a] = -math.log(input_parser_weight[a] / (max_value+1e-7))
-
-
         return input_parser_weight
 
-    def get_input_parser_weight_norm(self, iteration, pickle_dataset_dump_directory, folders, sentence_count, medcpt_dictionary):
+    def get_input_parser_weight_labels_log(self, iteration, pickle_dataset_dump_directory, folders, sentence_count, medcpt_dictionary):
         if iteration == 1:
-            input_parser_weight = [1] * len(folders)
+            input_parser_label_weight = [1] * len(folders)
         else:
-            input_parser_weight = []
+            error_rate_array = []
             for j in range(0, len(folders)):
                 folder = folders[j]
                 pickle_path = str(pickle_dataset_dump_directory) + str(folder) + '/'
                 with open(str(pickle_path) + '/unique_sentence_cluster_dictionary.pickle', 'rb') as handle:
                     unique_sentence_cluster_dictionary = pickle.load(handle)
-                robinson_foulds_distance = 0
+                error_rate_label = []
                 for k in range(1, sentence_count + 1):
                     true_cluster = medcpt_dictionary[k]['medcpt_clusters']
                     predict_cluster = unique_sentence_cluster_dictionary[k]['unique_cluster_span']
+                    true_label = medcpt_dictionary[k]['pos_aggregation']
+                    predict_label = unique_sentence_cluster_dictionary[k]['unique_pos_span']
                     true_error = medcpt_dictionary[k]['error']
                     predict_error = unique_sentence_cluster_dictionary[k]['error']
+
                     if (true_error == False) and (predict_error == False):
                         evaluation_object = evaluation(true_cluster=true_cluster, predict_cluster=predict_cluster)
-                        robinson_foulds_distance = robinson_foulds_distance + evaluation_object.robinson_foulds_distance(cluster1=true_cluster, cluster2=predict_cluster)
-                    elif (predict_error == False):
-                        robinson_foulds_distance = robinson_foulds_distance + len(true_cluster)
-                if robinson_foulds_distance != 0:
-                    input_parser_weight.append(1/robinson_foulds_distance)
-                else:
-                    input_parser_weight.append(-1)
+                        error_rate_label.append(
+                            evaluation_object.error_rate_label(true_cluster=true_cluster, true_label=true_label,
+                                                                   predict_cluster=predict_cluster,
+                                                                   predict_label=predict_label))
 
-        sum_value = np.sum(input_parser_weight)
-        for a in range(0, len(input_parser_weight)):
-            if input_parser_weight[a] == -1:
-                input_parser_weight[a] = sum_value + 1
+                mean_error_rate = np.mean(error_rate_label)
 
-        input_parser_weight = np.array(input_parser_weight)
-        norm = np.linalg.norm(input_parser_weight)
+                error_rate_array.append(mean_error_rate)
 
-        normalized_input_parser_weight = input_parser_weight / norm
+        if iteration != 1:
+            input_parser_label_weight = []
+            max_value = np.max(error_rate_array)
+            for a in range(0, len(error_rate_array)):
+                weight = -math.log(error_rate_array[a]/max_value + 1e-7)
+                input_parser_label_weight.append(weight)
 
-        input_parser_weight = list(normalized_input_parser_weight)
-
-        return input_parser_weight
+        return input_parser_label_weight
 
     def aggregate_clusters(self, input_parser_weight, total_unique_cluster_span, total_unique_cluster_support, total_unique_cluster_pos, error):
         if error == False:
@@ -274,10 +148,8 @@ class medcpt:
             for i in range(0, len(total_unique_cluster_support)):
                 cluster_weight = 0
                 for j in range(0, len(total_unique_cluster_support[i])):
-                    #print(len(total_unique_cluster_support[i]))
                     cluster_weight = cluster_weight + total_unique_cluster_support[i][j] * input_parser_weight[j]
                 cluster_support = cluster_weight/sum_parser_weight
-                #cluster_support = cluster_weight / len(total_unique_cluster_support[i])
                 weighted_support.append(cluster_support)
 
             medcpt_clusters = []
@@ -292,10 +164,8 @@ class medcpt:
                     temp_cluster_array.append(total_unique_cluster_span[i])
                     temp_cluster_pos.append(total_unique_cluster_pos[i])
 
-            #print(temp_cluster_array)
 
             if len(temp_cluster_array) > 0:
-                #print("In")
                 compatibility_object = compatibility(temp_cluster_array=temp_cluster_array)
                 compatible_cluster_index = compatibility_object.compatible_cluster_index(temp_cluster_array=temp_cluster_array)
 
@@ -368,16 +238,74 @@ class medcpt:
 
         return pos_aggregation
 
+
+def medcpt_aggregate_labels():
+    pickle_dump_directory = "../dictionary_pickle_files/"
+    directories = ["penntreebank_english/"]
+    folders = ["allennlp", "berkeley", "hanlp", "corenlp"]
+    sentences = [100]
+    for d in range(0, len(directories)):
+        dataset = directories[d]
+        pickle_dataset_dump_directory = str(pickle_dump_directory) + str(directories[d])
+        medcpt_directory = str(pickle_dump_directory) + str(dataset) + 'medcpt'
+        sentence_count = sentences[d]
+        with open(str(medcpt_directory) + '/medcpt_aggregate_clusters_dictionary_log.pickle', 'rb') as handle:
+            medcpt_aggregate_clusters_dictionary = pickle.load(handle)
+
+        iteration = 1
+        medcpt_iteration = 3
+        medcpt_object = medcpt(cluster_span=[], cluster_pos=[])
+        medcpt_aggregate_labels_dictionary = {}
+        input_parser_label_weight = medcpt_object.get_input_parser_weight_labels_log(iteration=iteration,
+                                                                        pickle_dataset_dump_directory=pickle_dataset_dump_directory,
+                                                                        folders=folders, sentence_count=sentence_count,
+                                                                        medcpt_dictionary=medcpt_aggregate_labels_dictionary)
+        previous_input_parser_weight = [0] * len(folders)
+        weight_vector_prev_iteration = np.asarray(previous_input_parser_weight)
+        weight_vector_this_iteration = np.asarray(input_parser_label_weight)
+        while (iteration < 6):
+            weight_vector_prev_iteration = weight_vector_this_iteration
+            medcpt_aggregate_labels_dictionary[iteration] = {}
+            for k in range(1, sentence_count + 1):
+                medcpt_clusters = medcpt_aggregate_clusters_dictionary[medcpt_iteration][k]['medcpt_clusters']
+                medcpt_pos = medcpt_aggregate_clusters_dictionary[medcpt_iteration][k]['medcpt_pos']
+                error = medcpt_aggregate_clusters_dictionary[medcpt_iteration][k]['error']
+
+                pos_aggregation = medcpt_object.aggregate_pos_labels(medcpt_pos=medcpt_pos,
+                                                                     input_parser_weight=input_parser_label_weight)
+
+                medcpt_aggregate_labels_dictionary[iteration][k] = {}
+                medcpt_aggregate_labels_dictionary[iteration][k]['medcpt_clusters'] = medcpt_clusters
+                medcpt_aggregate_labels_dictionary[iteration][k]['medcpt_pos'] = medcpt_pos
+                medcpt_aggregate_labels_dictionary[iteration][k]['pos_aggregation'] = pos_aggregation
+                medcpt_aggregate_labels_dictionary[iteration][k]['error'] = error
+                print(k)
+            medcpt_aggregate_labels_dictionary[iteration]['input_parser_label_weight'] = input_parser_label_weight
+            iteration = iteration + 1
+            input_parser_label_weight = medcpt_object.get_input_parser_weight_labels_log(iteration=iteration,
+                                                                            pickle_dataset_dump_directory=pickle_dataset_dump_directory,
+                                                                            folders=folders,
+                                                                            sentence_count=sentence_count,
+                                                                            medcpt_dictionary=
+                                                                            medcpt_aggregate_labels_dictionary[
+                                                                                iteration - 1])
+            weight_vector_this_iteration = np.asarray(input_parser_label_weight)
+            print(input_parser_label_weight)
+        with open(str(medcpt_directory) + '/medcpt_aggregate_labels_dictionary_log.pickle', 'wb') as handle:
+            pickle.dump(medcpt_aggregate_labels_dictionary, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open(str(medcpt_directory) + '/medcpt_aggregate_labels_dictionary_log.pickle', 'rb') as handle:
+            medcpt_aggregate_labels_dictionary_pickle = pickle.load(handle)
+
+        print(medcpt_aggregate_labels_dictionary_pickle == medcpt_aggregate_labels_dictionary)
+
+    return True
+
 def medcpt_aggregate_clusters():
     pickle_dump_directory = "../dictionary_pickle_files/"
-    directories = ["penntreebank_english/", "ontonotes_english/"]
-    # #directories = ["ontonotes_english/"]
-    folders = ["allennlp", "berkeley", "hanlp", "corenlp"]
-    sentences = [49208, 143709]
-    # directories = ["ontonotes_chinese/"]
-    # folders = ["sapar", "berkeley", "hanlp", "corenlp"]
-    # sentences = [51230]
-    #sentences = [143709]
+    directories = ["penntreebank_english/"]
+    folders = ["berkeley", "hanlp", "corenlp", "allennlp"]
+    sentences = [100]
     for d in range(0, len(directories)):
         dataset = directories[d]
         pickle_dataset_dump_directory = str(pickle_dump_directory) + str(directories[d])
@@ -393,7 +321,6 @@ def medcpt_aggregate_clusters():
         previous_input_parser_weight = [0]*len(folders)
         weight_vector_prev_iteration = np.asarray(previous_input_parser_weight)
         weight_vector_this_iteration = np.asarray(input_parser_weight)
-        #while(abs(np.sum(np.subtract(weight_vector_this_iteration, weight_vector_prev_iteration))) > 0.7):
         while (iteration < 6):
             weight_vector_prev_iteration = weight_vector_this_iteration
             medcpt_aggregate_clusters_dictionary[iteration] = {}
@@ -402,12 +329,6 @@ def medcpt_aggregate_clusters():
                 total_unique_cluster_support = input_cluster_support_dictionary[k]['total_unique_cluster_support']
                 total_unique_cluster_pos = input_cluster_support_dictionary[k]['total_unique_cluster_pos']
                 error = input_cluster_support_dictionary[k]['error']
-                #print(total_unique_cluster_support)
-                #input_parser_count = len(total_unique_cluster_support[0])
-                #input_parser_count = 4
-                #print(input_parser_count)
-                #input_parser_weight = [1] * input_parser_count
-                #print(input_parser_weight)
 
                 medcpt_clusters, medcpt_pos = medcpt_object.aggregate_clusters(input_parser_weight= input_parser_weight, total_unique_cluster_span=total_unique_cluster_span, total_unique_cluster_support=total_unique_cluster_support,
                                                                                total_unique_cluster_pos=total_unique_cluster_pos, error=error)
@@ -444,12 +365,9 @@ def medcpt_aggregate_clusters():
 
 def unique_cluster_main():
     pickle_dump_directory = "../dictionary_pickle_files/"
-    # directories = ["penntreebank_english/", "ontonotes_english/"]
-    # folders = ["allennlp", "berkeley", "hanlp", "corenlp", "ground_truth"]
-    # sentences = [49208, 143709]
-    directories = ["ontonotes_chinese/"]
-    folders = ["sapar", "berkeley", "hanlp", "corenlp", "ground_truth"]
-    sentences = [51230]
+    directories = ["penntreebank_english/"]
+    folders = ["berkeley", "hanlp", "corenlp", "allennlp", "ground_truth"]
+    sentences = [100]
     for i in range(0, len(directories)):
         directory = str(pickle_dump_directory) + str(directories[i])
         sentence_count = sentences[i]
@@ -489,12 +407,9 @@ def unique_cluster_main():
 
 def support_main():
     pickle_dump_directory = "../dictionary_pickle_files/"
-    # directories = ["penntreebank_english/", "ontonotes_english/"]
-    # folders = ["allennlp", "berkeley", "hanlp", "corenlp"]
-    # sentences = [49208, 143709]
-    directories = ["ontonotes_chinese/"]
-    folders = ["sapar", "berkeley", "hanlp", "corenlp"]
-    sentences = [51230]
+    directories = ["penntreebank_english/"]
+    folders = ["berkeley", "hanlp", "corenlp", "allennlp"]
+    sentences = [100]
 
     for d in range(0, len(directories)):
         directory = str(pickle_dump_directory) + str(directories[d])
@@ -510,7 +425,6 @@ def support_main():
 
         input_cluster_support_dictionary = {}
         input_parser_count = len(folders)
-        #for k in range(1, sentence_count+1):
         for k in range(1, sentence_count + 1):
             current_sentence_count = k
             input_cluster_support_dictionary[current_sentence_count] = {}
@@ -544,9 +458,7 @@ def support_main():
 
 
 if __name__ == '__main__':
-    # run = unique_cluster_main()
-    # run = support_main()
-    run = medcpt_aggregate_clusters()
-
-
-
+    run = unique_cluster_main()
+    run1 = support_main()
+    run2 = medcpt_aggregate_clusters()
+    run3 = medcpt_aggregate_labels()

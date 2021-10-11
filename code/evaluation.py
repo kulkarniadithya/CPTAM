@@ -25,6 +25,8 @@ class evaluation:
         else:
             precision = 0
 
+        precision = round(precision, 2)
+
         return precision
 
     def recall_score(self, true_cluster, predict_cluster):
@@ -36,7 +38,7 @@ class evaluation:
             recall = TP / len(true_cluster)
         else:
             recall = 0
-
+        recall = round(recall, 2)
         return recall
 
     def f1_score(self, true_cluster, predict_cluster):
@@ -47,7 +49,7 @@ class evaluation:
             f1 = 0
         else:
             f1 = (2 * precision * recall) / (precision + recall)
-
+        f1 = round(f1, 2)
         return f1
 
     def accuracy_score(self, true_cluster, predict_cluster):
@@ -59,7 +61,7 @@ class evaluation:
             accuracy = correct / len(predict_cluster)
         else:
             accuracy = 0
-
+        accuracy = round(accuracy, 2)
         return accuracy
 
     def precision_score_label(self, true_cluster, true_label, predict_cluster, predict_label):
@@ -89,6 +91,8 @@ class evaluation:
             precision = 0
         else:
             precision = (TP / (TP + FP))
+
+        precision = round(precision, 2)
         return precision
 
     def accuracy_score_label(self, true_cluster, true_label, predict_cluster, predict_label):
@@ -114,7 +118,36 @@ class evaluation:
             accuracy = 0
         else:
             accuracy = (TP / (TP + FP))
+
+        accuracy = round(accuracy, 2)
         return accuracy
+
+    def error_rate_label(self, true_cluster, true_label, predict_cluster, predict_label):
+        TP = 0
+        FP = 0
+        for i in range(0, len(predict_cluster)):
+            for j in range(0, len(true_cluster)):
+                if true_cluster[j] == predict_cluster[i]:
+                    for a in range(0, len(true_label[j])):
+                        ground_truth_label = str(true_label[j][a]).split('-')[0]
+                        boolean = False
+                        for k in range(0, len(predict_label[i])):
+                            prediction_label = str(predict_label[i][k]).split('-')[0]
+                            if prediction_label == ground_truth_label:
+                                TP = TP + 1
+                                boolean = True
+                                break
+                        if boolean == False:
+                            FP = FP + 1
+                    break
+
+        if (TP + FP) == 0:
+            error_rate = 0
+        else:
+            error_rate = (FP / (TP + FP))
+
+        error_rate = round(error_rate, 2)
+        return error_rate
 
     def recall_score_label(self, true_cluster, true_label, predict_cluster, predict_label):
         TP = 0
@@ -142,6 +175,7 @@ class evaluation:
             recall = 0
         else:
             recall = (TP / (TP + FN))
+        recall = round(recall, 2)
         return recall
 
     def f1_score_label(self, true_cluster, true_label, predict_cluster, predict_label):
@@ -154,17 +188,14 @@ class evaluation:
             f1 = 0
         else:
             f1 = (2 * precision * recall) / (precision + recall)
-
+        f1 = round(f1, 2)
         return f1
 
 def baseline_evaluation():
     pickle_dump_directory = "../dictionary_pickle_files/"
-    # directories = ["penntreebank_english/", "ontonotes_english/"]
-    # folders = ["allennlp", "berkeley", "hanlp", "corenlp"]
-    # sentences = [49208, 143709]
-    directories = ["ontonotes_chinese/"]
-    folders = ["sapar", "berkeley", "hanlp", "corenlp"]
-    sentences = [51230]
+    directories = ["penntreebank_english/"]
+    folders = ["berkeley", "hanlp", "corenlp", "allennlp"]
+    sentences = [100]
     for i in range(0, len(directories)):
         directory = str(pickle_dump_directory) + str(directories[i])
         sentence_count = sentences[i]
@@ -195,6 +226,15 @@ def baseline_evaluation():
                 predict_label = unique_sentence_cluster_dictionary[k]['unique_pos_span']
                 true_error = gt_unique_sentence_cluster_dictionary[k]['error']
                 predict_error = unique_sentence_cluster_dictionary[k]['error']
+
+                for clu in range(0, len(true_cluster)):
+                    string = true_cluster[clu]
+                    string = string.replace(" ", "")
+                    true_cluster[clu] = string
+                for clu in range(0, len(predict_cluster)):
+                    string = predict_cluster[clu]
+                    string = string.replace(" ", "")
+                    predict_cluster[clu] = string
 
                 if (true_error==False) and (predict_error==False):
                     evaluation_object = evaluation(true_cluster=true_cluster, predict_cluster=predict_cluster)
@@ -250,11 +290,9 @@ def baseline_evaluation():
 
 def medcpt_evaluation():
     pickle_dump_directory = "../dictionary_pickle_files/"
-    directories = ["penntreebank_english/", "ontonotes_english/"]
-    sentences = [49208, 143709]
-    # directories = ["ontonotes_chinese/"]
-    # folders = ["sapar", "berkeley", "hanlp", "corenlp"]
-    # sentences = [51230]
+    directories = ["penntreebank_english/"]
+    folders = ["berkeley", "hanlp", "corenlp", "allennlp"]
+    sentences = [100]
     for d in range(0, len(directories)):
         dataset = directories[d]
         sentence_count = sentences[d]
@@ -290,6 +328,15 @@ def medcpt_evaluation():
                 predict_label_weight = medcpt_aggregate_clusters_dictionary[iteration][k]['weight_pos_aggregation']
                 true_error = gt_unique_sentence_cluster_dictionary[k]['error']
                 predict_error = medcpt_aggregate_clusters_dictionary[iteration][k]['error']
+
+                for clu in range(0, len(true_cluster)):
+                    string = true_cluster[clu]
+                    string = string.replace(" ", "")
+                    true_cluster[clu] = string
+                for clu in range(0, len(predict_cluster)):
+                    string = predict_cluster[clu]
+                    string = string.replace(" ", "")
+                    predict_cluster[clu] = string
 
                 if (true_error == False) and (predict_error == False):
                     evaluation_object = evaluation(true_cluster=true_cluster, predict_cluster=predict_cluster)
@@ -369,6 +416,90 @@ def medcpt_evaluation():
 
     return True
 
+def medcpt_pos_evaluation():
+    pickle_dump_directory = "../dictionary_pickle_files/"
+    directories = ["penntreebank_english/"]
+    sentences = [100]
+    for d in range(0, len(directories)):
+        print("Dataset: " + str(directories[d]))
+        dataset = directories[d]
+        sentence_count = sentences[d]
+        medcpt_directory = str(pickle_dump_directory) + str(dataset) + 'medcpt'
+        with open(str(medcpt_directory) + '/medcpt_aggregate_labels_dictionary_log.pickle', 'rb') as handle:
+            medcpt_aggregate_labels_dictionary = pickle.load(handle)
+        ground_truth_pickle_path = str(pickle_dump_directory) + str(dataset) + str("ground_truth") + '/'
+        with open(str(ground_truth_pickle_path) + '/unique_sentence_cluster_dictionary.pickle', 'rb') as handle:
+            gt_unique_sentence_cluster_dictionary = pickle.load(handle)
+        number_of_iterations = len(medcpt_aggregate_labels_dictionary)
+        medcpt_pos_results_dictionary = {}
+        for iteration in range(1, number_of_iterations+1):
+            precision_score_label = []
+            recall_score_label = []
+            f1_score_label = []
+            accuracy_score_label = []
+            for k in range(1, sentence_count + 1):
+                true_cluster = gt_unique_sentence_cluster_dictionary[k]['unique_cluster_span']
+                predict_cluster = medcpt_aggregate_labels_dictionary[iteration][k]['medcpt_clusters']
+                true_label = gt_unique_sentence_cluster_dictionary[k]['unique_pos_span']
+                predict_label = medcpt_aggregate_labels_dictionary[iteration][k]['pos_aggregation']
+                true_error = gt_unique_sentence_cluster_dictionary[k]['error']
+                predict_error = medcpt_aggregate_labels_dictionary[iteration][k]['error']
+
+                for clu in range(0, len(true_cluster)):
+                    string = true_cluster[clu]
+                    string = string.replace(" ", "")
+                    true_cluster[clu] = string
+                for clu in range(0, len(predict_cluster)):
+                    string = predict_cluster[clu]
+                    string = string.replace(" ", "")
+                    predict_cluster[clu] = string
+
+                if (true_error == False) and (predict_error == False):
+                    evaluation_object = evaluation(true_cluster=true_cluster, predict_cluster=predict_cluster)
+
+                    precision_score_label.append(
+                        evaluation_object.precision_score_label(true_cluster=true_cluster, true_label=true_label,
+                                                                predict_cluster=predict_cluster,
+                                                                predict_label=predict_label))
+                    recall_score_label.append(
+                        evaluation_object.recall_score_label(true_cluster=true_cluster, true_label=true_label,
+                                                             predict_cluster=predict_cluster,
+                                                             predict_label=predict_label))
+                    f1_score_label.append(
+                        evaluation_object.f1_score_label(true_cluster=true_cluster, true_label=true_label,
+                                                         predict_cluster=predict_cluster,
+                                                         predict_label=predict_label))
+                    accuracy_score_label.append(
+                        evaluation_object.accuracy_score_label(true_cluster=true_cluster, true_label=true_label,
+                                                               predict_cluster=predict_cluster,
+                                                               predict_label=predict_label))
+            medcpt_pos_results_dictionary[iteration] = {}
+            medcpt_pos_results_dictionary[iteration]['precision_score'] = np.mean(precision_score_label)
+            medcpt_pos_results_dictionary[iteration]['recall_score'] = np.mean(recall_score_label)
+            medcpt_pos_results_dictionary[iteration]['f1_score'] = np.mean(f1_score_label)
+            medcpt_pos_results_dictionary[iteration]['accuracy_score'] = np.mean(accuracy_score_label)
+
+            print("Iteration: " + str(iteration) + " precision_score: " + str(np.mean(precision_score_label)) + " recall_score: " + str(np.mean(recall_score_label))
+                  + " f1_score: " + str(np.mean(f1_score_label)) + " accuracy_score: " + str(np.mean(accuracy_score_label)))
+
+        if not os.path.exists(str(pickle_dump_directory) + str(dataset)):
+            os.mkdir(str(pickle_dump_directory) + str(dataset))
+        results_directory = str(str(pickle_dump_directory) + str(dataset)) + 'results'
+        if not os.path.exists(results_directory):
+            os.mkdir(results_directory)
+
+        with open(str(results_directory) + '/medcpt_pos_results_dictionary_log.pickle', 'wb') as handle:
+            pickle.dump(medcpt_pos_results_dictionary, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open(str(results_directory) + '/medcpt_pos_results_dictionary_log.pickle', 'rb') as handle:
+            medcpt_pos_results_dictionary_pickle = pickle.load(handle)
+
+        print(medcpt_pos_results_dictionary_pickle == medcpt_pos_results_dictionary)
+    return True
+
+
+
 if __name__ == '__main__':
-    #run = baseline_evaluation()
+    run = baseline_evaluation()
     run1 = medcpt_evaluation()
+    run2 = medcpt_pos_evaluation()

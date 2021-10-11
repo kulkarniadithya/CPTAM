@@ -24,7 +24,6 @@ class compatibility:
                         updated_character = updated_character + characters_cluster[i + j]
                     updated_character_cluster.append(updated_character)
                     counter = counter + digit_span
-                    #print(updated_character)
                     if (counter + digit_span + 1) <= len(characters_cluster):
                         next_character = ''
                         for j in range(0, digit_span + 1):
@@ -84,21 +83,12 @@ class compatibility:
         for i in range(0, len(appended_cluster_array)):
             compatible_boolean_cluster = []
             for j in range(0, len(appended_cluster_array)):
-                # characters = [char for char in appended_cluster_array[j]]
-                # characters_i = [char for char in appended_cluster_array[i]]
                 if (appended_cluster_array[j] in appended_cluster_array[i]) or (
                         appended_cluster_array[i] in appended_cluster_array[j]):
                     compatible_boolean_cluster.append(True)
-                # elif (len(characters_i) <= 3) or (len(characters) <= 3):
-                #     compatible_boolean_cluster.append(True)
                 else:
-                    # print("In")
-                    # print(appended_cluster_array[i])
-                    # print(appended_cluster_array[j])
                     first_array = self.get_character_cluster_updated(appended_cluster_array[i])
-                    #print(first_array)
                     second_array = self.get_character_cluster_updated(appended_cluster_array[j])
-                    #print(second_array)
                     independent_boolean = True
 
                     for a in range(0, len(second_array)):
@@ -112,7 +102,6 @@ class compatibility:
 
     def compatible_cluster_index(self, temp_cluster_array):
         compatibility_matrix = self.check_cluster_compatibility(temp_cluster_array=temp_cluster_array)
-        #print(compatibility_matrix)
         incompatible_clusters_count = []
 
         for i in range(0, len(compatibility_matrix)):
@@ -145,9 +134,3 @@ class compatibility:
             incompatible_count = incompatible_count + 1
 
         return compatible_cluster_index
-
-# if __name__ == '__main__':
-#     temp_cluster_array = ['123 45678 9 1011121314 15161718192021 222324 25262728293031323334 3536373839 4041424344 4546 47484950515253 54 555657 585960 616263646566 6768 69 707172737475 7677 78798081828384 8586 8788 8990919293949596 9798 99100101102103104105 106 107108109 110111112113114 115116117 118', '555657 585960 616263646566 6768 69 707172737475 7677 78798081828384 8586 8788 8990919293949596 9798 99100101102103104105 106 107108109 110111112113114 115116117', '585960 616263646566 6768 69 707172737475 7677 78798081828384 8586 8788 8990919293949596 9798 99100101102103104105 106 107108109 110111112113114 115116117', '6768 69 707172737475 7677 78798081828384', '69 707172737475 7677 78798081828384', '7677 78798081828384', '8586 8788 8990919293949596 9798 99100101102103104105 106 107108109 110111112113114 115116117', '8788 8990919293949596 9798 99100101102103104105 106 107108109 110111112113114 115116117', '99100101102103104105']
-#     compatibility_object = compatibility(temp_cluster_array=temp_cluster_array)
-#     compatible_cluster_index = compatibility_object.compatible_cluster_index(temp_cluster_array=temp_cluster_array)
-#     print(compatible_cluster_index)

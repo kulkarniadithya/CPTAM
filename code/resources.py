@@ -2,6 +2,9 @@ import re
 import pickle
 import os
 from hanlp_resources import pre_format_hanlp_parsed_sentence
+import random
+import string
+letters = string.ascii_lowercase
 
 class clusters_from_parsed_sentence:
     def __init__(self, parsed_sentence, language):
@@ -104,6 +107,12 @@ class character_indexing:
         return self.pos
     def format_parsed_sentence(self, parsed_sentence):
         parsed_sentence_backup = parsed_sentence
+        formatted_characters = [char for char in parsed_sentence]
+        numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '`', '\'', '!', '@', '#', '$', '%', '^', '&', '*', '[', ']', '-', '_', '+', '=', ';', ':', '>', '<', '|', '/', '¿½', '¿', '½', '°']
+        for i in range (0, len(formatted_characters)):
+            if formatted_characters[i] in numbers:
+                formatted_characters[i] = random.choice(letters)
+        parsed_sentence = ''.join(formatted_characters)
         tokens = self.get_tokens(parsed_sentence=parsed_sentence)
         pos = self.get_pos(parsed_sentence=parsed_sentence)
         for i in range(0, len(pos)):
@@ -120,7 +129,6 @@ class character_indexing:
         for i in range(0, len(formatted_characters)):
             for j in range(covered, len(characters)):
                 if characters[j] == formatted_characters[i]:
-                    #formatted_characters[i] = str(character_index[j])
                     formatted_characters[i] = str(character_index[j]) + '_'
                     covered = j + 1
                     break
@@ -137,16 +145,13 @@ class character_indexing:
 
         return self.formatted_parsed_sentence, self.characters, self.character_index
 
-
 def dictionary_creation():
     pickle_dump_directory = "../dictionary_pickle_files/"
-    dataset_directory = "../dataset/"
-    #directories = ["penntreebank_english/", "ontonotes_english/"]
-    directories = ["ontonotes_chinese/"]
-    #folders = ["sapar", "berkeley", "hanlp", "corenlp", "ground_truth"]
-    folders = ["hanlp"]
-    #sentences = [49208, 143709]
-    sentences = [51230]
+    dataset_directory = "../sample_dataset/"
+    directories = ["penntreebank_english/"]
+    folders = ["berkeley", "hanlp", "corenlp", "allennlp", "ground_truth"]
+    sentences = [100]
+
     for i in range(0, len(directories)):
         directory = str(dataset_directory) + str(directories[i])
         sentence_count = sentences[i]
@@ -157,8 +162,14 @@ def dictionary_creation():
             sentence_cluster_dictionary = {}
             parser_input_dictionary = {}
             for k in range(1, sentence_count + 1):
-                read_file = open(str(path) + 'sentence_' + str(k) + '.txt', 'r')
-                read_line = read_file.readline()
+                try:
+                    read_file = open(str(path) + 'sentence_' + str(k) + '.txt', 'r')
+                    read_line = read_file.readline()
+                except:
+                    write_file = open(str(path) + 'sentence_' + str(k) + '.txt', 'w')
+                    write_file.close()
+                    read_file = open(str(path) + 'sentence_' + str(k) + '.txt', 'r')
+                    read_line = read_file.readline()
                 parsed_sentence = read_line.rstrip()
                 parser_input_dictionary[k] = {}
                 parser_input_dictionary[k]['parsed_input_sentence'] = parsed_sentence
@@ -205,6 +216,8 @@ def dictionary_creation():
                     sentence_cluster_dictionary[k]['error'] = True
 
             pickle_directory = str(pickle_dump_directory) + str(directories[i])
+            if not os.path.exists(pickle_dump_directory):
+                os.mkdir(pickle_dump_directory)
             if not os.path.exists(pickle_directory):
                 os.mkdir(pickle_directory)
             pickle_path = str(pickle_directory) + str(folder) + '/'
@@ -234,11 +247,4 @@ def dictionary_creation():
 
 
 if __name__ == '__main__':
-    # parsed_sentence = "(S (NP (NNP BUSH) (CC AND) (NNP GORBACHEV)) (VP (MD WILL) (VP (VB HOLD) (NP (NP (CD two) (NNS days)) (PP (IN of) (NP (JJ informal) (NNS talks)))) (NP (IN next) (NN month)))) (. .))"
-    # character_indexing_object = character_indexing(parsed_sentence=parsed_sentence, language='English')
-    # formatted_parsed_sentence, characters, character_index = character_indexing_object.format_parsed_sentence(
-    #     parsed_sentence=parsed_sentence)
-    # print(formatted_parsed_sentence)
     run = dictionary_creation()
-
-

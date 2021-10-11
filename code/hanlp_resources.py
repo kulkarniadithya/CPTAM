@@ -41,33 +41,16 @@ class pre_format_hanlp_parsed_sentence:
                               '（', '）', '…', '三', '○', '『',  '』', '□', '〉', '〈', '∶', '＆', '@ ', '# ', '$ ', '% ', '^ ', '& ', '* ', '- ', '_ ', '+ ', '= ', '| ', '{ ', '} ', '\" ', "\' ",
                               '／ ', '－', '＝', '＞', '＜', '｛', '｝', '［', '］', '｀', '＋', '＂', '＝', '／', '，', '．', '·', '％', '＊', '“', '”', '×', '，', '＄', '【', '】', '｜', '：', '．', '＠',
                               '＿', '－', '‘', '’', '”', '／', '＇', '"', '<', '=', '～', '，', '（', '）', '•', '◆', '．','※', '●', '■', '<', '>', '，', '―', '／', '＾', '＿', '一',
-                              '＼', '／', '＃', '，', '。', 'o', '–', ',', '_', '.', '一' ]
+                              '＼', '／', '＃', '，', '。', 'o', '–', ',', '_', '.', '一', '¿½', '¿', '½', '°']
 
-        #decimal_characters = [0,1,2,3,4,5,6,7,8,9]
-        #print(hanlp_characters)
         for i in range(0, len(hanlp_characters)):
             if hanlp_characters[i] in special_characters:
                 hanlp_characters[i] = random.choice(letters)
 
-        #print(hanlp_characters)
-
-        # for i in range(0, len(hanlp_characters)):
-        #     if (hanlp_characters[i]) not in ['[', ']', ' ']:
-        #         if (hanlp_characters[i]).isalpha() == False:
-        #             hanlp_characters[i] = random.choice(letters)
-
-
         formatted_sentence = ''.join(hanlp_characters)
-
-        #print(formatted_sentence)
-
-        # pos = re.findall("\[\w+ ", formatted_sentence)
-        # tokens = re.findall("\[\w+.\]", formatted_sentence)
 
         pos = re.findall("\[\w+ ", formatted_sentence)
         tokens = re.findall("\[\w+.\]", formatted_sentence)
-
-        #print(tokens)
 
         formatted_tokens = [''] * len(tokens)
         for i in range(0, len(tokens)):
@@ -77,15 +60,15 @@ class pre_format_hanlp_parsed_sentence:
         for i in range(0, len(tokens)):
             formatted_sentence = formatted_sentence.replace(tokens[i], formatted_tokens[i], 1)
 
-        #print(formatted_sentence)
+        formatted_sentence = formatted_sentence.replace("PU [[]", "PU s")
+        formatted_sentence = formatted_sentence.replace("PU []]", "PU s")
+        formatted_sentence = formatted_sentence.replace("PU []", "PU s")
 
         return formatted_sentence
 
     def pre_format_sentence(self, hanlp_parsed_sentence):
         hanlp_parsed_sentence_wqc = self.remove_quotes_comma(hanlp_parsed_sentence=hanlp_parsed_sentence)
-        #print(hanlp_parsed_sentence_wqc)
         formatted_sentence = self.remove_brackets_around_tokens(hanlp_parsed_sentence=hanlp_parsed_sentence_wqc)
-        #print(formatted_sentence)
         hanlp_characters = [char for char in formatted_sentence]
         hanlp_brackets = []
         hanlp_brackets_index = []
@@ -120,8 +103,6 @@ class pre_format_hanlp_parsed_sentence:
             current_length_bracket_array = len(brackets_array)
             if previous_length_bracket_array == current_length_bracket_array:
                 if len(brackets_array) > 0:
-                    # print("Length of brackets left: " + str(len(brackets_array)))
-                    # print("brackets left: " + str(brackets_array))
                     raise Exception("Invalid number of brackets")
                 break
 
