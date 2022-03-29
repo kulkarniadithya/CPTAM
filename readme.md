@@ -63,4 +63,14 @@
 <li>python print_results.py</li>
 </ul>
 
+  <h3> Citation </h3>
+  <p>@misc{kulkarni2022cptam,
+      title={CPTAM: Constituency Parse Tree Aggregation Method}, 
+      author={Adithya Kulkarni and Nasim Sabetpour and Alexey Markin and Oliver Eulenstein and Qi Li},
+      year={2022},
+      eprint={2201.07905},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
+}</p>
+  
 </html>
